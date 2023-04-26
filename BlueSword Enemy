@@ -1,0 +1,40 @@
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyController : MonoBehaviour
+{
+
+
+    public GameObject DeathPrefab;
+    public int hp = 3;
+
+    public AudioClip d;
+    public GameObject box;
+
+    AudioSource soundPlayer;
+
+    public void OnDamage()
+    {
+        hp -= 1;
+        if (hp <= 0)
+        {
+
+            AudioSource soundPlayer = GetComponent<AudioSource>();
+            if (soundPlayer != null)
+            {
+                soundPlayer.PlayOneShot(d, 2f);
+
+                Instantiate(DeathPrefab, transform.position, transform.rotation);
+
+            }
+
+            Destroy(gameObject, 0.2f);
+            Destroy(box);
+        }
+    }
+}
+
+
+    // Start is called before the first frame update
