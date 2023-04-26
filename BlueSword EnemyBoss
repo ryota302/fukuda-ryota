@@ -1,0 +1,91 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class boss : MonoBehaviour
+{
+    public float speed = 5f;
+    public float range = 5f;
+    public float attackRange = 1f;
+    public float attackDelay = 1f;
+
+    private Transform player;
+    private Rigidbody2D rb;
+    private Animator anim;
+    private float attackTimer;
+    private bool facingRight = true;
+    public string playerTag;
+    // Start is called before the first frame update
+    void Start()
+    {
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.flipX = true;
+        player = GameObject.FindGameObjectWithTag("Player").transform;
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+        anim.SetTrigger("attack");
+            
+}
+
+    private  void Update()
+    {
+        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+        Vector3 playerPos = player.position;
+
+        
+        if (transform.position.x < playerPos.x)
+        {
+            // プレイヤーが右側にいる場合は向きを変更する
+            transform.localScale = new Vector2(-1, 1);
+        }
+        else
+        {
+            // プレイヤーが左側にいる場合は向きを変更する
+            transform.localScale = new Vector2(1, 1);
+        }       // プレイヤーが攻撃範囲内にいる場合は攻撃する
+        if (distanceToPlayer < attackRange)
+        {
+            anim.SetTrigger("attack");
+            attackTimer = attackDelay;
+            rb.velocity = Vector2.zero;
+        }
+        else
+        {
+            // 攻撃範囲外でランダムに突進する
+            if (attackTimer <= 0)
+            {
+                float horizontalInput = Random.Range(-1f, 1f);
+                float verticalInput = Random.Range(-1f, 1f);
+                Vector2 direction = new Vector2(horizontalInput, verticalInput).normalized;
+                rb.velocity = direction * speed;
+                attackTimer = Random.Range(1f, 3f);
+                anim.SetTrigger("attack");
+            }
+            else
+            {
+                attackTimer -= Time.deltaTime;
+            }
+
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        
+        if (collision.gameObject.CompareTag("Box"))
+        {
+            Vector2 direction = (collision.contacts[0].point - (Vector2)transform.position).normalized;
+            rb.velocity = -direction * speed;
+            Flip();
+        }
+    }
+
+
+
+    private void Flip()
+    {
+        
+        facingRight = !facingRight;
+        transform.Rotate(0f, 180f, 0f);
+    }
+}
